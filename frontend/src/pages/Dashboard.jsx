@@ -45,9 +45,15 @@ export default function Dashboard() {
         <Link to="/facturas/nueva" className="btn-primary">+ Nueva factura</Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <StatCard label="Ventas del mes" value={formatMoney(monthReport?.income)} accent="text-teal-600" />
-        <StatCard label="Gastos del mes" value={formatMoney(monthReport?.expenses)} accent="text-red-500" />
+        <StatCard label="Gastos del mes" value={formatMoney(monthReport?.expenses)} hint="Incluye compras" accent="text-red-500" />
+        <StatCard
+          label="Utilidad del mes"
+          value={formatMoney(monthReport?.net)}
+          hint="Ventas - gastos y compras"
+          accent={monthReport?.net >= 0 ? 'text-emerald-600' : 'text-red-500'}
+        />
         <StatCard label="Cartera pendiente" value={formatMoney(pending?.totalPending)} hint={`${pending?.rows.length || 0} facturas por cobrar`} />
       </div>
 

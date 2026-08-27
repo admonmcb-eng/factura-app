@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS expenses (
   category TEXT,
   amount REAL NOT NULL,
   description TEXT,
+  purchase_id INTEGER REFERENCES purchases(id),
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -110,6 +111,13 @@ CREATE TABLE IF NOT EXISTS purchases (
   created_at TEXT DEFAULT (datetime('now'))
 );
 `);
+
+// Migración segura para bases de datos creadas antes de agregar esta columna.
+try {
+  db.exec('ALTER TABLE expenses ADD COLUMN purchase_id INTEGER REFERENCES purchases(id)');
+} catch (e) {
+  // La columna ya existe, no hacer nada.
+}
 
 const userCount = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
 if (userCount === 0) {

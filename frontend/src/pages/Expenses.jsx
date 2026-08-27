@@ -23,8 +23,12 @@ export default function Expenses() {
 
   async function remove(id) {
     if (!confirm('¿Eliminar este gasto?')) return;
-    await api.deleteExpense(id);
-    load();
+    try {
+      await api.deleteExpense(id);
+      load();
+    } catch (err) {
+      alert(err.message);
+    }
   }
 
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -56,9 +60,16 @@ export default function Expenses() {
           <tbody>
             {expenses.map((e) => (
               <tr key={e.id} className="hover:bg-slate-50">
-                <td>{e.date}</td><td>{e.supplier}</td><td>{e.category}</td><td>{e.description}</td>
+                <td>{e.date}</td><td>{e.supplier}</td>
+                <td>
+                  {e.category}
+                  {e.purchase_id && <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Compra</span>}
+                </td>
+                <td>{e.description}</td>
                 <td className="text-right font-mono-num">{formatMoney(e.amount)}</td>
-                <td className="text-right"><button className="text-red-500 font-semibold hover:underline" onClick={() => remove(e.id)}>Eliminar</button></td>
+                <td className="text-right">
+                  {!e.purchase_id && <button className="text-red-500 font-semibold hover:underline" onClick={() => remove(e.id)}>Eliminar</button>}
+                </td>
               </tr>
             ))}
             {expenses.length === 0 && <tr><td colSpan={6} className="text-center text-slate-400 py-6">No hay gastos registrados.</td></tr>}

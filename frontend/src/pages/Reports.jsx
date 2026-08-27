@@ -51,7 +51,7 @@ export default function Reports() {
       </div>
 
       <div className="flex gap-2 text-sm">
-        {[['ventas', 'Ventas'], ['cartera', 'Cartera pendiente'], ['balance', 'Ingresos vs. gastos']].map(([key, label]) => (
+        {[['ventas', 'Ventas'], ['cartera', 'Cartera pendiente'], ['balance', 'Utilidad']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} className={`px-3 py-1 rounded-full font-semibold ${tab === key ? 'bg-navy-900 text-white' : 'bg-white border border-slate-200 text-slate-600'}`}>{label}</button>
         ))}
       </div>
@@ -97,10 +97,26 @@ export default function Reports() {
       )}
 
       {tab === 'balance' && ie && (
-        <div className="card p-6 grid grid-cols-3 gap-4 text-center">
-          <div><div className="label">Ingresos</div><div className="text-xl font-bold text-teal-600 font-mono-num">{formatMoney(ie.income)}</div></div>
-          <div><div className="label">Gastos</div><div className="text-xl font-bold text-red-500 font-mono-num">{formatMoney(ie.expenses)}</div></div>
-          <div><div className="label">Neto</div><div className="text-xl font-bold text-navy-900 font-mono-num">{formatMoney(ie.net)}</div></div>
+        <div className="card p-6">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="label">Ingresos</div>
+              <div className="text-xl font-bold text-teal-600 font-mono-num">{formatMoney(ie.income)}</div>
+            </div>
+            <div>
+              <div className="label">Gastos (incluye compras)</div>
+              <div className="text-xl font-bold text-red-500 font-mono-num">{formatMoney(ie.expenses)}</div>
+            </div>
+            <div>
+              <div className="label">Utilidad</div>
+              <div className={`text-xl font-bold font-mono-num ${ie.net >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{formatMoney(ie.net)}</div>
+            </div>
+          </div>
+          {ie.income > 0 && (
+            <div className="text-center text-sm text-slate-500 mt-4 pt-4 border-t border-slate-100">
+              Margen de utilidad del periodo: <span className="font-semibold text-navy-900">{((ie.net / ie.income) * 100).toFixed(1)}%</span>
+            </div>
+          )}
         </div>
       )}
     </div>

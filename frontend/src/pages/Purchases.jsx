@@ -56,7 +56,7 @@ export default function Purchases() {
   }
 
   async function remove(id) {
-    if (!confirm('¿Eliminar esta compra? Esto también descontará la cantidad del inventario del producto asociado.')) return;
+    if (!confirm('¿Eliminar esta compra? Esto también descontará la cantidad del inventario del producto asociado y eliminará el gasto vinculado.')) return;
     await api.deletePurchase(id);
     load();
     api.getProducts().then(setProducts);

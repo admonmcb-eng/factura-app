@@ -31,13 +31,26 @@ router.post('/', (req, res) => {
     VALUES (?,?,?,?,?,?,?,?)
   `);
   const bumpStock = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
+  const insertExpense = db.prepare(`
+    INSERT INTO expenses (date, supplier, category, amount, description, purchase_id)
+    VALUES (?,?,?,?,?,?)
+  `);
 
   const tx = db.transaction(() => {
     const info = insertPurchase.run(date, supplier || null, product_id || null, item_name, qty, cost, total, notes || null);
+    const purchaseId = info.lastInsertRowid;
     if (product_id) {
       bumpStock.run(qty, product_id);
     }
-    return info.lastInsertRowid;
+    insertExpense.run(
+      date,
+      supplier || null,
+      'Compras',
+      total,
+      `Compra: ${item_name} x${qty}`,
+      purchaseId
+    );
+    return purchaseId;
   });
 
   const id = tx();
@@ -52,6 +65,7 @@ router.delete('/:id', (req, res) => {
     if (purchase.product_id) {
       db.prepare('UPDATE products SET stock = stock - ? WHERE id = ?').run(purchase.quantity, purchase.product_id);
     }
+    db.prepare('DELETE FROM expenses WHERE purchase_id = ?').run(req.params.id);
     db.prepare('DELETE FROM purchases WHERE id = ?').run(req.params.id);
   });
   tx();

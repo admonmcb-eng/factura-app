@@ -25,6 +25,11 @@ router.post('/', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
+  const expense = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+  if (!expense) return res.status(404).json({ error: 'Gasto no encontrado' });
+  if (expense.purchase_id) {
+    return res.status(400).json({ error: 'Este gasto viene de una compra. Elimínalo desde la sección Compras.' });
+  }
   db.prepare('DELETE FROM expenses WHERE id = ?').run(req.params.id);
   res.status(204).end();
 });
