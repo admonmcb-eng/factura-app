@@ -49,13 +49,17 @@ export const api = {
   getInvoice: (id) => request(`/invoices/${id}`),
   createInvoice: (data) => request('/invoices', { method: 'POST', body: JSON.stringify(data) }),
   voidInvoice: (id) => request(`/invoices/${id}/void`, { method: 'POST' }),
-  invoicePdfUrl: (id) => `${BASE}/invoices/${id}/pdf`,
+  invoicePdfUrl: (id) => `${BASE}/invoices/${id}/pdf?token=${encodeURIComponent(localStorage.getItem('token') || '')}`,
 
   addPayment: (data) => request('/payments', { method: 'POST', body: JSON.stringify(data) }),
 
   getExpenses: (from, to) => request(`/expenses${from && to ? `?from=${from}&to=${to}` : ''}`),
   createExpense: (data) => request('/expenses', { method: 'POST', body: JSON.stringify(data) }),
   deleteExpense: (id) => request(`/expenses/${id}`, { method: 'DELETE' }),
+
+  getPurchases: (from, to) => request(`/purchases${from && to ? `?from=${from}&to=${to}` : ''}`),
+  createPurchase: (data) => request('/purchases', { method: 'POST', body: JSON.stringify(data) }),
+  deletePurchase: (id) => request(`/purchases/${id}`, { method: 'DELETE' }),
 
   reportSales: (from, to) => request(`/reports/sales?from=${from}&to=${to}`),
   reportPending: () => request('/reports/pending'),

@@ -8,6 +8,7 @@ import Invoices from './pages/Invoices.jsx';
 import InvoiceForm from './pages/InvoiceForm.jsx';
 import InvoiceView from './pages/InvoiceView.jsx';
 import Expenses from './pages/Expenses.jsx';
+import Purchases from './pages/Purchases.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 
@@ -24,6 +25,7 @@ const navItems = [
   { to: '/facturas', label: 'Facturas', icon: '▤' },
   { to: '/clientes', label: 'Clientes', icon: '◍' },
   { to: '/productos', label: 'Productos', icon: '◫' },
+  { to: '/compras', label: 'Compras', icon: '▼' },
   { to: '/gastos', label: 'Gastos', icon: '◒' },
   { to: '/reportes', label: 'Reportes', icon: '◔' },
   { to: '/configuracion', label: 'Empresa', icon: '⚙' },
@@ -102,6 +104,7 @@ export default function App() {
         <Route path="/facturas/:id" element={<InvoiceView />} />
         <Route path="/clientes" element={<Clients />} />
         <Route path="/productos" element={<Products />} />
+        <Route path="/compras" element={<Purchases />} />
         <Route path="/gastos" element={<Expenses />} />
         <Route path="/reportes" element={<Reports />} />
         <Route path="/configuracion" element={<Settings />} />
