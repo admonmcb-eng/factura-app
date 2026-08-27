@@ -40,6 +40,11 @@ export const api = {
   updateClient: (id, data) => request(`/clients/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteClient: (id) => request(`/clients/${id}`, { method: 'DELETE' }),
 
+  getSuppliers: (q) => request(`/suppliers${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+  createSupplier: (data) => request('/suppliers', { method: 'POST', body: JSON.stringify(data) }),
+  updateSupplier: (id, data) => request(`/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSupplier: (id) => request(`/suppliers/${id}`, { method: 'DELETE' }),
+
   getProducts: (q) => request(`/products${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   createProduct: (data) => request('/products', { method: 'POST', body: JSON.stringify(data) }),
   updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

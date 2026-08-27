@@ -17,17 +17,17 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { name, unit, price, stock, track_stock, category } = req.body;
+  const { name, unit, price, cost, stock, track_stock, category } = req.body;
   if (!name || price === undefined) return res.status(400).json({ error: 'Nombre y precio son obligatorios' });
-  const info = db.prepare('INSERT INTO products (name, unit, price, stock, track_stock, category) VALUES (?,?,?,?,?,?)')
-    .run(name, unit || 'Unidad', price, stock || 0, track_stock ? 1 : 0, category);
+  const info = db.prepare('INSERT INTO products (name, unit, price, cost, stock, track_stock, category) VALUES (?,?,?,?,?,?,?)')
+    .run(name, unit || 'Unidad', price, cost || 0, stock || 0, track_stock ? 1 : 0, category);
   res.status(201).json(db.prepare('SELECT * FROM products WHERE id = ?').get(info.lastInsertRowid));
 });
 
 router.put('/:id', (req, res) => {
-  const { name, unit, price, stock, track_stock, category } = req.body;
-  db.prepare('UPDATE products SET name=?, unit=?, price=?, stock=?, track_stock=?, category=? WHERE id=?')
-    .run(name, unit, price, stock, track_stock ? 1 : 0, category, req.params.id);
+  const { name, unit, price, cost, stock, track_stock, category } = req.body;
+  db.prepare('UPDATE products SET name=?, unit=?, price=?, cost=?, stock=?, track_stock=?, category=? WHERE id=?')
+    .run(name, unit, price, cost || 0, stock, track_stock ? 1 : 0, category, req.params.id);
   res.json(db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id));
 });
 

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom'
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Clients from './pages/Clients.jsx';
+import Suppliers from './pages/Suppliers.jsx';
 import Products from './pages/Products.jsx';
 import Invoices from './pages/Invoices.jsx';
 import InvoiceForm from './pages/InvoiceForm.jsx';
@@ -24,6 +25,7 @@ const navItems = [
   { to: '/', label: 'Panel', icon: '◧' },
   { to: '/facturas', label: 'Facturas', icon: '▤' },
   { to: '/clientes', label: 'Clientes', icon: '◍' },
+  { to: '/proveedores', label: 'Proveedores', icon: '◈' },
   { to: '/productos', label: 'Productos', icon: '◫' },
   { to: '/compras', label: 'Compras', icon: '▼' },
   { to: '/gastos', label: 'Gastos', icon: '◒' },
@@ -103,6 +105,7 @@ export default function App() {
         <Route path="/facturas/nueva" element={<InvoiceForm />} />
         <Route path="/facturas/:id" element={<InvoiceView />} />
         <Route path="/clientes" element={<Clients />} />
+        <Route path="/proveedores" element={<Suppliers />} />
         <Route path="/productos" element={<Products />} />
         <Route path="/compras" element={<Purchases />} />
         <Route path="/gastos" element={<Expenses />} />

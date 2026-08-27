@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { date, supplier, product_id, item_name, quantity, unit_cost, notes } = req.body;
+  const { date, supplier_id, product_id, item_name, quantity, unit_cost, notes } = req.body;
   if (!date || !item_name || !quantity) {
     return res.status(400).json({ error: 'Fecha, ítem y cantidad son obligatorios' });
   }
@@ -26,25 +26,33 @@ router.post('/', (req, res) => {
   const cost = Number(unit_cost || 0);
   const total = qty * cost;
 
+  let supplierName = null;
+  if (supplier_id) {
+    const supplierRow = db.prepare('SELECT name FROM suppliers WHERE id = ?').get(supplier_id);
+    supplierName = supplierRow ? supplierRow.name : null;
+  }
+
   const insertPurchase = db.prepare(`
-    INSERT INTO purchases (date, supplier, product_id, item_name, quantity, unit_cost, total, notes)
-    VALUES (?,?,?,?,?,?,?,?)
+    INSERT INTO purchases (date, supplier, supplier_id, product_id, item_name, quantity, unit_cost, total, notes)
+    VALUES (?,?,?,?,?,?,?,?,?)
   `);
   const bumpStock = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
+  const updateCost = db.prepare('UPDATE products SET cost = ? WHERE id = ?');
   const insertExpense = db.prepare(`
     INSERT INTO expenses (date, supplier, category, amount, description, purchase_id)
     VALUES (?,?,?,?,?,?)
   `);
 
   const tx = db.transaction(() => {
-    const info = insertPurchase.run(date, supplier || null, product_id || null, item_name, qty, cost, total, notes || null);
+    const info = insertPurchase.run(date, supplierName, supplier_id || null, product_id || null, item_name, qty, cost, total, notes || null);
     const purchaseId = info.lastInsertRowid;
     if (product_id) {
       bumpStock.run(qty, product_id);
+      updateCost.run(cost, product_id);
     }
     insertExpense.run(
       date,
-      supplier || null,
+      supplierName,
       'Compras',
       total,
       `Compra: ${item_name} x${qty}`,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api, formatMoney } from '../api.js';
 
-const empty = { name: '', unit: 'Unidad', price: 0, stock: 0, track_stock: false, category: '' };
+const empty = { name: '', unit: 'Unidad', price: 0, cost: 0, stock: 0, track_stock: false, category: '' };
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -17,7 +17,7 @@ export default function Products() {
 
   async function submit(e) {
     e.preventDefault();
-    const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
+    const payload = { ...form, price: Number(form.price), cost: Number(form.cost || 0), stock: Number(form.stock) };
     if (editingId) await api.updateProduct(editingId, payload);
     else await api.createProduct(payload);
     setForm(empty);
@@ -51,7 +51,8 @@ export default function Products() {
         <form onSubmit={submit} className="card p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><label className="label">Nombre</label><input className="input" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div><label className="label">Categoría</label><input className="input" value={form.category || ''} onChange={(e) => setForm({ ...form, category: e.target.value })} /></div>
-          <div><label className="label">Precio unitario</label><input className="input" type="number" step="0.01" required value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+          <div><label className="label">Precio de venta</label><input className="input" type="number" step="0.01" required value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+          <div><label className="label">Costo (última compra)</label><input className="input" type="number" step="0.01" value={form.cost || 0} onChange={(e) => setForm({ ...form, cost: e.target.value })} /></div>
           <div><label className="label">Unidad de medida</label><input className="input" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} /></div>
           <div className="flex items-center gap-2 pt-6">
             <input id="track" type="checkbox" checked={form.track_stock} onChange={(e) => setForm({ ...form, track_stock: e.target.checked })} />
@@ -70,7 +71,7 @@ export default function Products() {
       <div className="card">
         <table className="w-full table-base">
           <thead>
-            <tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th></th></tr>
+            <tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Costo</th><th>Stock</th><th></th></tr>
           </thead>
           <tbody>
             {products.map((p) => (
@@ -78,6 +79,7 @@ export default function Products() {
                 <td className="font-medium text-navy-900">{p.name}</td>
                 <td>{p.category}</td>
                 <td className="font-mono-num">{formatMoney(p.price)}</td>
+                <td className="font-mono-num text-slate-500">{formatMoney(p.cost)}</td>
                 <td>{p.track_stock ? p.stock : '—'}</td>
                 <td className="text-right space-x-3">
                   <button className="text-teal-600 font-semibold hover:underline" onClick={() => edit(p)}>Editar</button>
@@ -85,7 +87,7 @@ export default function Products() {
                 </td>
               </tr>
             ))}
-            {products.length === 0 && <tr><td colSpan={5} className="text-center text-slate-400 py-6">No hay productos registrados.</td></tr>}
+            {products.length === 0 && <tr><td colSpan={6} className="text-center text-slate-400 py-6">No hay productos registrados.</td></tr>}
           </tbody>
         </table>
       </div>

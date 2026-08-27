@@ -26,13 +26,29 @@ function generateInvoicePdf({ company, client, invoice, items }, stream) {
   const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
   const left = doc.page.margins.left;
 
+  // --- Logo (si la empresa cargó uno en Configuración) ---
+  let textStartX = left;
+  let logoDrawn = false;
+  if (company.logo_url && company.logo_url.startsWith('data:image')) {
+    try {
+      const base64Data = company.logo_url.split(',')[1];
+      const imgBuffer = Buffer.from(base64Data, 'base64');
+      doc.image(imgBuffer, left, 38, { fit: [70, 50] });
+      textStartX = left + 82;
+      logoDrawn = true;
+    } catch (e) {
+      // Si el logo no se puede leer, seguimos sin él.
+    }
+  }
+
   // --- Encabezado ---
-  doc.font('Helvetica-Bold').fontSize(14).text(company.name || 'Mi Empresa', left, 40, { width: pageWidth * 0.6 });
+  const headerTextWidth = pageWidth * 0.6 - (logoDrawn ? 82 : 0);
+  doc.font('Helvetica-Bold').fontSize(14).text(company.name || 'Mi Empresa', textStartX, 40, { width: headerTextWidth });
   doc.font('Helvetica').fontSize(9);
-  doc.text(company.nit ? String(company.nit) : '', left, doc.y, { width: pageWidth * 0.6 });
-  doc.text(company.address || '', { width: pageWidth * 0.6 });
-  doc.text(company.phone || '', { width: pageWidth * 0.6 });
-  doc.text(company.email || '', { width: pageWidth * 0.6 });
+  doc.text(company.nit ? String(company.nit) : '', textStartX, doc.y, { width: headerTextWidth });
+  doc.text(company.address || '', textStartX, doc.y, { width: headerTextWidth });
+  doc.text(company.phone || '', textStartX, doc.y, { width: headerTextWidth });
+  doc.text(company.email || '', textStartX, doc.y, { width: headerTextWidth });
 
   doc.font('Helvetica').fontSize(9).text('Factura de venta', left + pageWidth * 0.65, 40, { width: pageWidth * 0.35, align: 'right' });
   doc.font('Helvetica-Bold').fontSize(13).text(`No. ${invoice.number}`, left + pageWidth * 0.65, doc.y, { width: pageWidth * 0.35, align: 'right' });

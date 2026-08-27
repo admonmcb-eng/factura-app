@@ -3,7 +3,7 @@ import { api, formatMoney } from '../api.js';
 
 const empty = {
   date: new Date().toISOString().slice(0, 10),
-  supplier: '',
+  supplier_id: '',
   product_id: '',
   item_name: '',
   quantity: 1,
@@ -14,22 +14,38 @@ const empty = {
 export default function Purchases() {
   const [purchases, setPurchases] = useState([]);
   const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [form, setForm] = useState(empty);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
+  const [showNewSupplier, setShowNewSupplier] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState('');
 
   async function load() {
     setPurchases(await api.getPurchases());
   }
+  async function loadCatalogs() {
+    api.getProducts().then(setProducts);
+    api.getSuppliers().then(setSuppliers);
+  }
   useEffect(() => {
     load();
-    api.getProducts().then(setProducts);
+    loadCatalogs();
   }, []);
 
   function pickProduct(productId) {
     const p = products.find((pr) => String(pr.id) === String(productId));
-    if (p) setForm((f) => ({ ...f, product_id: p.id, item_name: p.name }));
+    if (p) setForm((f) => ({ ...f, product_id: p.id, item_name: p.name, unit_cost: p.cost || f.unit_cost }));
     else setForm((f) => ({ ...f, product_id: '', item_name: '' }));
+  }
+
+  async function addSupplierInline() {
+    if (!newSupplierName.trim()) return;
+    const created = await api.createSupplier({ name: newSupplierName.trim() });
+    setNewSupplierName('');
+    setShowNewSupplier(false);
+    await api.getSuppliers().then(setSuppliers);
+    setForm((f) => ({ ...f, supplier_id: created.id }));
   }
 
   async function submit(e) {
@@ -42,6 +58,7 @@ export default function Purchases() {
     try {
       await api.createPurchase({
         ...form,
+        supplier_id: form.supplier_id || null,
         product_id: form.product_id || null,
         quantity: Number(form.quantity),
         unit_cost: Number(form.unit_cost || 0),
@@ -49,7 +66,7 @@ export default function Purchases() {
       setForm(empty);
       setShowForm(false);
       load();
-      api.getProducts().then(setProducts);
+      loadCatalogs();
     } catch (err) {
       setError(err.message);
     }
@@ -59,7 +76,7 @@ export default function Purchases() {
     if (!confirm('¿Eliminar esta compra? Esto también descontará la cantidad del inventario del producto asociado y eliminará el gasto vinculado.')) return;
     await api.deletePurchase(id);
     load();
-    api.getProducts().then(setProducts);
+    loadCatalogs();
   }
 
   const total = purchases.reduce((sum, p) => sum + p.total, 0);
@@ -71,7 +88,7 @@ export default function Purchases() {
         <button className="btn-primary" onClick={() => { setForm(empty); setShowForm(true); }}>+ Nueva compra</button>
       </div>
       <p className="text-sm text-slate-500">
-        Registra aquí lo que compras a tus proveedores. Si seleccionas un producto del inventario, su stock se suma automáticamente.
+        Registra aquí lo que compras a tus proveedores. Si seleccionas un producto del inventario, su stock y costo se actualizan automáticamente.
       </p>
 
       {showForm && (
@@ -82,7 +99,21 @@ export default function Purchases() {
           </div>
           <div>
             <label className="label">Proveedor</label>
-            <input className="input" value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} />
+            {!showNewSupplier ? (
+              <div className="flex gap-2">
+                <select className="input" value={form.supplier_id} onChange={(e) => setForm({ ...form, supplier_id: e.target.value })}>
+                  <option value="">Sin proveedor</option>
+                  {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <button type="button" className="btn-secondary text-xs whitespace-nowrap" onClick={() => setShowNewSupplier(true)}>+ Nuevo</button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input className="input" placeholder="Nombre del proveedor" value={newSupplierName} onChange={(e) => setNewSupplierName(e.target.value)} />
+                <button type="button" className="btn-primary text-xs whitespace-nowrap" onClick={addSupplierInline}>Agregar</button>
+                <button type="button" className="btn-secondary text-xs" onClick={() => setShowNewSupplier(false)}>×</button>
+              </div>
+            )}
           </div>
           <div className="sm:col-span-2">
             <label className="label">Producto del inventario (opcional)</label>

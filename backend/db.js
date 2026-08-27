@@ -40,11 +40,23 @@ CREATE TABLE IF NOT EXISTS clients (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS suppliers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  identification TEXT,
+  address TEXT,
+  city TEXT,
+  phone TEXT,
+  email TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   unit TEXT DEFAULT 'Unidad',
   price REAL NOT NULL DEFAULT 0,
+  cost REAL DEFAULT 0,
   stock REAL DEFAULT 0,
   track_stock INTEGER DEFAULT 0,
   category TEXT,
@@ -102,6 +114,7 @@ CREATE TABLE IF NOT EXISTS purchases (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   date TEXT NOT NULL,
   supplier TEXT,
+  supplier_id INTEGER REFERENCES suppliers(id),
   product_id INTEGER REFERENCES products(id),
   item_name TEXT NOT NULL,
   quantity REAL NOT NULL,
@@ -112,9 +125,19 @@ CREATE TABLE IF NOT EXISTS purchases (
 );
 `);
 
-// Migración segura para bases de datos creadas antes de agregar esta columna.
+// Migraciones seguras para bases de datos creadas antes de estas columnas.
 try {
   db.exec('ALTER TABLE expenses ADD COLUMN purchase_id INTEGER REFERENCES purchases(id)');
+} catch (e) {
+  // La columna ya existe, no hacer nada.
+}
+try {
+  db.exec('ALTER TABLE products ADD COLUMN cost REAL DEFAULT 0');
+} catch (e) {
+  // La columna ya existe, no hacer nada.
+}
+try {
+  db.exec('ALTER TABLE purchases ADD COLUMN supplier_id INTEGER REFERENCES suppliers(id)');
 } catch (e) {
   // La columna ya existe, no hacer nada.
 }
