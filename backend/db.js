@@ -1,8 +1,15 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 
-const db = new Database(path.join(__dirname, 'data.sqlite'));
+// En Railway, DB_PATH apunta al volumen permanente (por ejemplo /data/data.sqlite)
+// para que los datos no se borren cuando el servidor se reinicia o se vuelve a desplegar.
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.sqlite');
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+console.log(`Base de datos: ${DB_PATH}`);
+
+const db = new Database(DB_PATH);
 db.pragma('foreign_keys = ON');
 
 db.exec(`
